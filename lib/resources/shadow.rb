@@ -44,29 +44,27 @@ module Inspec::Resources
 
     filtertable = FilterTable.create
     filtertable
-      .add_accessor(:where)
-      .add_accessor(:entries)
-      .add(:user, field: 'user')
-      .add(:password, field: 'password')
-      .add(:last_change, field: 'last_change')
-      .add(:min_days, field: 'min_days')
-      .add(:max_days, field: 'max_days')
-      .add(:warn_days, field: 'warn_days')
-      .add(:inactive_days, field: 'inactive_days')
-      .add(:expiry_date, field: 'expiry_date')
-      .add(:reserved, field: 'reserved')
+      .register_column(:user, field: 'user')
+      .register_column(:password, field: 'password')
+      .register_column(:last_change, field: 'last_change')
+      .register_column(:min_days, field: 'min_days')
+      .register_column(:max_days, field: 'max_days')
+      .register_column(:warn_days, field: 'warn_days')
+      .register_column(:inactive_days, field: 'inactive_days')
+      .register_column(:expiry_date, field: 'expiry_date')
+      .register_column(:reserved, field: 'reserved')
 
-    filtertable.add(:content) { |t, _|
+    filtertable.register_custom_property(:content) { |t, _|
       t.entries.map do |e|
         [e.user, e.password, e.last_change, e.min_days, e.max_days, e.warn_days, e.inactive_days, e.expiry_date].compact.join(':')
       end.join("\n")
     }
 
-    filtertable.add(:count) { |i, _|
+    filtertable.register_custom_property(:count) { |i, _|
       i.entries.length
     }
 
-    filtertable.connect(self, :set_params)
+    filtertable.install_filter_methods_on_resource(self, :set_params)
 
     def filter(query = {})
       return self if query.nil? || query.empty?
